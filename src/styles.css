@@ -1,0 +1,101 @@
+:root {
+  --blue: #0b84fe;
+  --gray: #e9e9eb;
+  --bg: #fff;
+  --text: #000;
+  --line: #d1d1d6;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --gray: #262629; --bg: #000; --text: #fff; --line: #38383a; }
+}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: #f2f2f7; color: var(--text); }
+@media (prefers-color-scheme: dark) { body { background: #111; } }
+
+.phone {
+  display: flex; flex-direction: column;
+  height: 100%; max-width: 430px; margin: 0 auto;
+  background: var(--bg);
+}
+@media (min-width: 500px) {
+  .phone { height: min(860px, 94vh); margin-top: 3vh; border-radius: 36px; overflow: hidden; border: 1px solid var(--line); }
+}
+
+/* setup */
+.setup { padding: 48px 24px; display: flex; flex-direction: column; gap: 20px; overflow: auto; }
+.setup h1 { margin: 0; font-size: 28px; }
+.hint { margin: 0; color: #8e8e93; line-height: 1.4; }
+label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #8e8e93; }
+input, textarea {
+  font: inherit; font-size: 17px; color: var(--text);
+  background: var(--gray); border: none; border-radius: 12px; padding: 12px; resize: none; outline: none;
+}
+button { font: inherit; cursor: pointer; border: none; }
+.primary { background: var(--blue); color: #fff; font-size: 17px; font-weight: 600; padding: 14px; border-radius: 14px; }
+.primary:disabled { opacity: .4; cursor: default; }
+
+/* header */
+header {
+  display: flex; align-items: center; padding: 10px 12px;
+  border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 92%, #888);
+}
+header .spacer, header .back { flex: 1; }
+.back { background: none; color: var(--blue); font-size: 17px; text-align: left; padding: 0; }
+.contact { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; }
+.avatar {
+  width: 44px; height: 44px; border-radius: 50%; color: #fff; font-size: 20px; font-weight: 600;
+  display: grid; place-items: center; background: linear-gradient(#a6abb8, #858a96);
+}
+
+/* messages */
+main { flex: 1; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 3px; }
+.bubble {
+  position: relative; max-width: 75%; padding: 8px 14px; border-radius: 18px;
+  font-size: 17px; line-height: 1.3; white-space: pre-wrap; overflow-wrap: anywhere;
+  animation: pop .18s ease-out;
+}
+.bubble.in { align-self: flex-start; background: var(--gray); color: var(--text); }
+.bubble.out { align-self: flex-end; background: var(--blue); color: #fff; }
+.bubble.tail { margin-bottom: 8px; }
+.bubble.tail::before {
+  content: ""; position: absolute; bottom: 0; width: 20px; height: 18px;
+}
+.bubble.in.tail::before { left: -6px; background: var(--gray); border-bottom-right-radius: 16px 14px; }
+.bubble.out.tail::before { right: -6px; background: var(--blue); border-bottom-left-radius: 16px 14px; }
+.bubble.tail::after {
+  content: ""; position: absolute; bottom: 0; width: 26px; height: 18px; background: var(--bg);
+}
+.bubble.in.tail::after { left: -26px; border-bottom-right-radius: 10px; }
+.bubble.out.tail::after { right: -26px; border-bottom-left-radius: 10px; }
+@keyframes pop { from { transform: scale(.9); opacity: 0; } }
+
+/* composer */
+footer { display: flex; align-items: flex-end; gap: 8px; padding: 8px 12px 14px; }
+footer textarea {
+  flex: 1; background: transparent; border: 1px solid var(--line);
+  border-radius: 18px; padding: 7px 14px; font-size: 17px; max-height: 120px;
+  field-sizing: content;
+}
+.send {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--blue); color: #fff;
+  font-size: 18px; font-weight: 700; line-height: 1; flex: none;
+}
+.send:disabled { opacity: .3; cursor: default; }
+
+/* burn */
+.burn-slot { flex: 1; display: flex; justify-content: flex-end; }
+.burn {
+  background: none; color: #ff6a00; font-size: 15px; font-weight: 600; padding: 0;
+}
+.burn:disabled { opacity: .4; cursor: default; }
+.bubble.out.burning {
+  animation: ash 0.5s ease-in both;
+}
+.bubble.out.burning::before, .bubble.out.burning::after { display: none; }
+@keyframes ash {
+  0%   { opacity: 1; transform: none; }
+  40%  { opacity: .9; }
+  100% { opacity: 0; transform: translate(34px, -30px) scale(.96); background: #8e8e93; }
+}
