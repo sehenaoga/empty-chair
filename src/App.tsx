@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+const TYPING_MS = 2000;
+
 // Everything lives in React state only. Nothing is written to
 // localStorage, cookies, or any server. Reload = it's gone.
 
@@ -12,12 +14,32 @@ export default function App() {
   const [replies, setReplies] = useState<Reply[]>([]);
   const [draft, setDraft] = useState("");
   const [burning, setBurning] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const typingTimer = useRef<number | undefined>(undefined);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const displaceRefs = useRef<Record<number, SVGFEDisplacementMapElement | null>>({});
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [replies, started]);
+  }, [replies, started, typing]);
+
+  useEffect(() => () => window.clearTimeout(typingTimer.current), []);
+
+  // Show the typing dots, then reveal the message and focus the composer.
+  const playTyping = () => {
+    window.clearTimeout(typingTimer.current);
+    setTyping(true);
+    typingTimer.current = window.setTimeout(() => {
+      setTyping(false);
+      setTimeout(() => inputRef.current?.focus(), 0);
+    }, TYPING_MS);
+  };
+
+  const begin = () => {
+    setStarted(true);
+    playTyping();
+  };
 
   const send = () => {
     const text = draft.trim();
@@ -49,12 +71,15 @@ export default function App() {
         setReplies([]);
         setDraft("");
         setBurning(false);
+        playTyping();
       }
     };
     requestAnimationFrame(tick);
   };
 
   const reset = () => {
+    window.clearTimeout(typingTimer.current);
+    setTyping(false);
     setStarted(false);
     setMessage("");
     setName("");
@@ -108,7 +133,7 @@ export default function App() {
           <button
             className="primary"
             disabled={!message.trim()}
-            onClick={() => setStarted(true)}
+            onClick={begin}
           >
             Receive message
           </button>
@@ -132,7 +157,13 @@ export default function App() {
             </div>
           </header>
           <main>
-            <div className="bubble in tail">{message.trim()}</div>
+            {typing ? (
+              <div className="bubble in tail typing" aria-label="Typing">
+                <span /><span /><span />
+              </div>
+            ) : (
+              <div className="bubble in tail">{message.trim()}</div>
+            )}
             {replies.map((r, i) => (
               <div
                 key={r.id}
@@ -167,9 +198,10 @@ export default function App() {
                 }
               }}
               placeholder="iMessage"
-              autoFocus
+              ref={inputRef}
+              disabled={typing}
             />
-            <button className="send" onClick={send} disabled={!draft.trim()} aria-label="Send">
+            <button className="send" onClick={send} disabled={typing || !draft.trim()} aria-label="Send">
               ↑
             </button>
           </footer>
